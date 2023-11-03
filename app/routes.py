@@ -1,5 +1,5 @@
+from .controllers import product_bp, user_bp
 from flask import Flask
-from . import product_bp, user_bp
 
 
 app = Flask(__name__)
