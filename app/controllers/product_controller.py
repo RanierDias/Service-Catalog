@@ -56,7 +56,7 @@ def rud_product(id):
         try:
             if not request.authorization:
                 return json.dumps(messageRequiredToken), 401
-            
+
             product_schema = ProductSchema(partial=True)
             product_validated = product_schema.loads(request.data)
             token: str = request.authorization.token
@@ -71,7 +71,7 @@ def rud_product(id):
     if request.method == "DELETE":
         if not request.authorization:
             return json.dumps(messageRequiredToken), 401
-        
+
         token: str = request.authorization.token
         response = deleteProduct(id, token)
 
