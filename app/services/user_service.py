@@ -5,13 +5,13 @@ from pymongo import ReturnDocument
 from pymongo.errors import PyMongoError
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from datetime import datetime, timedelta
 from passlib.hash import pbkdf2_sha256
 from dotenv import load_dotenv
 from bson import ObjectId
 import os
 import jwt
 import json
-import datetime
 import smtplib
 
 
@@ -21,6 +21,8 @@ load_dotenv()
 messageServerError = {'message': "Erro interno no servidor."}
 messageNotFound = {'message': 'Usuário não existe ou senha errada.'}
 messageAlreadyExists = {'message': 'Usuário já existe.'}
+messageNotPermission = {'message': 'Você não tem permissão suficiente.'}
+messageTokenExpired = {'message': 'Token expirado ou inválido.'}
 
 
 def log_user(data: dict):
@@ -44,7 +46,7 @@ def log_user(data: dict):
         token: str = jwt.encode(
             {
                 'user': {'id': id_user, 'admin': admin},
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(5)
+                'exp': datetime.utcnow() + timedelta(5)
             }, secret_key, 'HS256')
         res_json = json.dumps({'token': token})
 
@@ -52,7 +54,6 @@ def log_user(data: dict):
     except PyMongoError as err:
         return [err._message, 500]
     except Exception as err:
-        print(err)
         return [json.dumps(messageServerError), 500]
 
 
@@ -73,11 +74,10 @@ def create_user(data: dict):
             {'admin': False, 'active': False, 'password': pass_hashed})
         user_collection.insert_one(data)
         id_user = str(data.get("_id"))
-
         token: str = jwt.encode(
             {
                 'user': {'id': id_user},
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(5)
+                'exp': datetime.utcnow() + timedelta(5)
             }, secret_key, 'HS256')
 
         body: str = template_confirm_acount(token)
@@ -104,7 +104,7 @@ def create_user(data: dict):
     except PyMongoError as err:
         return [err._message, 500]
     except Exception as err:
-        print("Error Marcado: ", err)
+        print("Erro: ", err)
         return [json.dumps(messageServerError), 500]
 
 
@@ -136,6 +136,12 @@ def delete_user(token: str):
         secret_key = os.getenv("SECRET_KEY")
         token_decoded: dict = jwt.decode(token, secret_key, ['HS256'])
         user = token_decoded['user']
+        time_validity = datetime.utcfromtimestamp(token_decoded['exp'])
+        time_now = datetime.utcnow()
+
+        if time_validity < time_now:
+            return [json.dumps(messageTokenExpired), 498]
+
         id = ObjectId(user['id'])
         user_found = user_collection.find_one_and_delete({'_id': {'$eq': id}})
 
@@ -146,4 +152,5 @@ def delete_user(token: str):
     except PyMongoError as err:
         return [err._message, 500]
     except Exception as err:
+        print(err)
         return [json.dumps(messageServerError), 500]
