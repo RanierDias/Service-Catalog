@@ -10,3 +10,4 @@ cluster = MongoClient(uri)
 db = cluster.get_database("service-catalog")
 
 product_collection = db.get_collection("product")
+user_collection = db.get_collection("user")
