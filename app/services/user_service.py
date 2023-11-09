@@ -140,7 +140,6 @@ def create_user(payload: dict):
     except PyMongoError as err:
         return [err._message, 500]
     except Exception as err:
-        print(err)
         return [json.dumps(messageServerError), 500]
 
 

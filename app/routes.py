@@ -1,14 +1,25 @@
-from .controllers import product_bp, user_bp
 from flask import Flask
+from flask_talisman import Talisman
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
 
 
-app = Flask(__name__)
-
-CORS(app, resources=r"/*",
-     origins=['https://catalogo-virtual-ranierdias.vercel.app/'])
+load_dotenv()
 
 
-app.register_blueprint(product_bp, url_prefix='/products')
+def run_app():
+     app = Flask(__name__)
+     domains = os.getenv('DOMAINS').split(', ')
+     
+     from .controllers import product_bp, user_bp
 
-app.register_blueprint(user_bp, url_prefix='/user')
+     CORS(app, resources=r"/*",
+          origins=domains)
+     Talisman(app)
+
+
+     app.register_blueprint(product_bp, url_prefix='/products')
+     app.register_blueprint(user_bp, url_prefix='/user')
+     
+     return app
