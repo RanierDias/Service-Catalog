@@ -67,7 +67,7 @@ def getProduct(id):
         return [json.dumps(messageServerError), 500]
 
 
-def createProduct(product: dict, token: str):
+def createProduct(payload: dict, token: str):
     try:
         status_token = validate_token(token)
 
@@ -75,8 +75,8 @@ def createProduct(product: dict, token: str):
             return status_token
 
         product_schema = ProductSchema()
-        product_collection.insert_one(product)
-        res_json = product_schema.dumps(product)
+        product_collection.insert_one(payload)
+        res_json = product_schema.dumps(payload)
 
         return [res_json, 201]
     except PyMongoError as err:
@@ -85,7 +85,7 @@ def createProduct(product: dict, token: str):
         return [json.dumps(messageServerError), 500]
 
 
-def updateProduct(id, data: dict, token: str):
+def updateProduct(id, payload: dict, token: str):
     try:
         status_token = validate_token(token)
 
@@ -93,7 +93,7 @@ def updateProduct(id, data: dict, token: str):
             return status_token
 
         product = product_collection.find_one_and_update(
-            {'_id': {'$eq': id}}, {'$set': data},
+            {'_id': {'$eq': id}}, {'$set': payload},
             return_document=ReturnDocument.AFTER
         )
 
@@ -107,7 +107,6 @@ def updateProduct(id, data: dict, token: str):
     except PyMongoError as err:
         return [err._message, 500]
     except Exception as err:
-        print(err)
         return [json.dumps(messageServerError), 500]
 
 
