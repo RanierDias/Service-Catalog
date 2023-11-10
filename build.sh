@@ -11,8 +11,4 @@ echo "Instalando as dependências..."
 
 pip install -r requirements.txt
 
-echo "Iniciando servidor wsgi!"
-
-gunicorn 'wsgi:run_app()'
-
 echo "Build concluído com sucesso!"
