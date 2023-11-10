@@ -9,6 +9,7 @@ source venv/bin/activate
 
 echo "Instalando as dependências..."
 
+pip install --upgrade pip
 pip install -r requirements.txt
 
 echo "Build concluído com sucesso!"
