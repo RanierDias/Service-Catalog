@@ -1,2 +1,6 @@
 version: 1
 buildCommand: ./build.sh
+
+env:
+  python:
+    version: 3.12.0
