@@ -9,17 +9,19 @@ load_dotenv()
 
 
 def run_app():
-     app = Flask(__name__)
-     domains = os.getenv('DOMAINS').split(', ')
-     
-     from .controllers import product_bp, user_bp
+    app = Flask(__name__)
+    domains = os.getenv('DOMAINS').split(', ')
 
-     CORS(app, resources=r"/*",
-          origins=domains)
-     Talisman(app)
+    if os.getenv('DEV'):
+        CORS(app, origins=["*"], methods=["GET"])
+        Talisman(app)
+    else:
+        CORS(app, origins=domains, methods=["GET", "POST", "PATCH", "DELETE"])
+        Talisman(app)
 
+    from .controllers import product_bp, user_bp
 
-     app.register_blueprint(product_bp, url_prefix='/products')
-     app.register_blueprint(user_bp, url_prefix='/user')
-     
-     return app
+    app.register_blueprint(product_bp, url_prefix='/products')
+    app.register_blueprint(user_bp, url_prefix='/user')
+
+    return app

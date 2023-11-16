@@ -1,4 +1,4 @@
-from app.services import getListProduct, getProduct, createProduct
+from app.services import getListProduct, getProduct, getProductByCategory, createProduct
 from app.services import updateProduct, deleteProduct
 from app.dtos import ProductSchema
 from marshmallow import ValidationError
@@ -33,6 +33,14 @@ def cr_products():
             return data, status
         except ValidationError as err:
             return err.messages, 400
+
+
+@product_bp.route('/category/<name>', methods=["GET"])
+def read_category(name):
+    response = getProductByCategory(name)
+    data, status = response
+
+    return data, status
 
 
 @product_bp.before_request

@@ -55,10 +55,27 @@ def getProduct(id):
         product = product_collection.find_one({"_id": {"$eq": id}})
 
         if not product:
-            return [messageNotFound, 404]
+            return [json.dumps(messageNotFound), 404]
 
         product_schema = ProductSchema()
         res_json = product_schema.dumps(product)
+
+        return [res_json, 200]
+    except PyMongoError as err:
+        return [err._message, 500]
+    except Exception as err:
+        return [json.dumps(messageServerError), 500]
+
+
+def getProductByCategory(category: str):
+    try:
+        product = product_collection.find({"category": category})
+
+        if not product:
+            return [json.dumps(messageNotFound), 404]
+
+        product_schema = ProductSchema()
+        res_json = product_schema.dumps(product, many=True)
 
         return [res_json, 200]
     except PyMongoError as err:
