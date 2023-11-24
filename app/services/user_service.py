@@ -68,6 +68,7 @@ def log_user(payload: dict):
         user_pass: str = user_found['password']
         admin: bool = user_found['admin']
         id_user = str(user_found['_id'])
+        user_cart = user_found['cart']
 
         if not pbkdf2_sha256.using(salt_size=12).verify(password, user_pass):
             return [json.dumps(messageNotFound), 404]
@@ -78,7 +79,7 @@ def log_user(payload: dict):
                 'user': {'id': id_user, 'admin': admin},
                 'exp': datetime.utcnow() + timedelta(5)
             }, secret_key, 'HS256')
-        res_json = json.dumps({'token': token})
+        res_json = json.dumps({'token': token, 'cart': user_cart})
 
         return [res_json, 200]
     except PyMongoError as err:
