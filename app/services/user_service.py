@@ -29,22 +29,13 @@ def validate_token(token: str):
     secret_key = os.getenv("SECRET_KEY")
     token_decoded: dict = jwt.decode(token, secret_key, ['HS256'])
     user = token_decoded['user']
-    time_validity = datetime.utcfromtimestamp(token_decoded['exp'])
-    time_now = datetime.utcnow()
 
-    if time_validity < time_now:
-        return [json.dumps(messageTokenExpired), 498]
-
-    return [user, 200]
+    return user
 
 
 def infor_user(token: str):
     try:
-        data, status_token = validate_token(token)
-
-        if status_token == 498:
-            return [data, status_token]
-
+        data = validate_token(token)
         id = ObjectId(data['id'])
         user = user_collection.find_one({'_id': {'$eq': id}})
 
@@ -58,6 +49,9 @@ def infor_user(token: str):
     except PyMongoError as err:
         return [err._message, 500]
     except Exception as err:
+        if (jwt.ExpiredSignatureError(err)):
+            return [json.dumps(messageTokenExpired), 498]
+
         return [json.dumps(messageServerError), 500]
 
 
@@ -115,12 +109,12 @@ def create_user(payload: dict):
                 'user': {'id': id_user},
                 'exp': datetime.utcnow() + timedelta(5)
             }, secret_key, 'HS256')
-        
+
         body: str = template_confirm_acount(token)
         subject: str = 'Confirmação da conta - Luxury Goods'
         email_owner = os.getenv('EMAIL')
         auth_owner = os.getenv('AUTH_EMAIL')
-        
+
         email = MIMEMultipart()
         email['From'] = email_owner
         email['To'] = email_user
@@ -132,7 +126,7 @@ def create_user(payload: dict):
         server.login(email_owner, auth_owner)
         server.sendmail(email['From'], email['To'], email.as_string())
         server.quit()
-        
+
         register_schema = RegisterSchema()
         res_json = register_schema.dumps(payload)
 
@@ -145,9 +139,7 @@ def create_user(payload: dict):
 
 def active_user(token: str):
     try:
-        secret_key = os.getenv("SECRET_KEY")
-        token_decoded: dict = jwt.decode(token, secret_key, ['HS256'])
-        user = token_decoded["user"]
+        user = validate_token(token)
         id: str = ObjectId(user['id'])
         user_found = user_collection.find_one_and_update(
             {'_id': {'$eq': id}}, {'$set': {'active': True}},
@@ -163,16 +155,15 @@ def active_user(token: str):
     except PyMongoError as err:
         return [err._message, 500]
     except Exception as err:
+        if (jwt.ExpiredSignatureError(err)):
+            return [json.dumps(messageTokenExpired), 498]
+
         return [json.dumps(messageServerError), 500]
 
 
 def update_user(payload, token: str):
     try:
-        data, status_token = validate_token(token)
-
-        if status_token == 498:
-            return [data, status_token]
-
+        data = validate_token(token)
         id = ObjectId(data['id'])
         user = user_collection.find_one_and_update(
             {'_id': {'$eq': id}}, {'$set': payload}, return_document=ReturnDocument.AFTER)
@@ -187,16 +178,15 @@ def update_user(payload, token: str):
     except PyMongoError as err:
         return [err._message, 500]
     except Exception as err:
+        if (jwt.ExpiredSignatureError(err)):
+            return [json.dumps(messageTokenExpired), 498]
+
         return [json.dumps(messageServerError), 500]
 
 
 def delete_user(token: str):
     try:
-        data, status_token = validate_token(token)
-
-        if status_token == 498:
-            return [data, status_token]
-
+        data = validate_token(token)
         id = ObjectId(data['id'])
         user_found = user_collection.find_one_and_delete({'_id': {'$eq': id}})
 
@@ -207,16 +197,15 @@ def delete_user(token: str):
     except PyMongoError as err:
         return [err._message, 500]
     except Exception as err:
+        if (jwt.ExpiredSignatureError(err)):
+            return [json.dumps(messageTokenExpired), 498]
+
         return [json.dumps(messageServerError), 500]
 
 
 def cart_update(payload, token: str):
     try:
-        data, status_token = validate_token(token)
-
-        if status_token == 498:
-            return [data, status_token]
-
+        data = validate_token(token)
         id = ObjectId(data['id'])
         user = user_collection.find_one_and_update(
             {'_id': {'$eq': id}}, {'$set': {'cart': payload}}, return_document=ReturnDocument.AFTER)
@@ -232,4 +221,7 @@ def cart_update(payload, token: str):
     except PyMongoError as err:
         return [err._message, 500]
     except Exception as err:
+        if (jwt.ExpiredSignatureError(err)):
+            return [json.dumps(messageTokenExpired), 498]
+
         return [json.dumps(messageServerError), 500]

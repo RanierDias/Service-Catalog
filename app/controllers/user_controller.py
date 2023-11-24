@@ -42,12 +42,12 @@ def rud_user():
 def login():
     try:
         login_schema = LoginSchema()
-        
+
         if not request.data:
             fields = login_schema.validate({})
-            
+
             return json.dumps(fields), 400
-        
+
         data_validated = login_schema.loads(request.data)
         data, status = log_user(data_validated)
 
@@ -60,12 +60,12 @@ def login():
 def register():
     try:
         register_schema = RegisterSchema()
-        
+
         if not request.data:
             fields = register_schema.validate({})
-            
+
             return json.dumps(fields), 400
-        
+
         data_validated = register_schema.loads(request.data)
         data, status = create_user(data_validated)
 
@@ -93,14 +93,15 @@ def update_cart():
 
         token = request.authorization.token
         cart_schema = CartSchema()
-        
+
         if not request.data:
             fields = cart_schema.validate([{}], many=True)
-            
+
             return json.dumps(fields), 400
-        
+
         data_validated = cart_schema.loads(request.data, many=True)
         data, status = cart_update(data_validated, token)
+        print("Response control: ", data)
 
         return data, status
     except ValidationError as err:
