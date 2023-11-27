@@ -10,7 +10,7 @@ class VariationsProductSchema(Schema):
 
 class ProductSchema(Schema):
     _id = fields.String(dump_only=True)
-    code = fields.String()
+    code = fields.String(required=True)
     name = fields.String(required=True)
     description = fields.String()
     category = fields.String(required=True)
