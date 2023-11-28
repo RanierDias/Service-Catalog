@@ -13,10 +13,11 @@ def run_app():
     domains = os.getenv('DOMAINS').split(', ')
 
     if os.getenv('DEV'):
-        CORS(app, origins=["*"], methods=["GET"])
+        CORS(app, origins=["*"], methods=["GET", "OPTIONS"])
         Talisman(app)
     else:
-        CORS(app, origins=domains, methods=["GET", "POST", "PATCH", "DELETE"])
+        CORS(app, origins=domains, methods=[
+             "GET", "POST", "PATCH", "DELETE", "OPTIONS"])
         Talisman(app)
 
     from .controllers import product_bp, user_bp
