@@ -13,10 +13,10 @@ def run_app():
     domains = os.getenv('DOMAINS').split(', ')
 
     if os.getenv('DEV'):
-        CORS(app, origins=["*"])
+        CORS(app, origins=["*"], supports_credentials=True)
         Talisman(app)
     else:
-        CORS(app, origins=domains)
+        CORS(app, origins=domains, supports_credentials=True)
         Talisman(app)
 
     from .controllers import product_bp, user_bp
