@@ -1,6 +1,6 @@
 from app.services import log_user, create_user, active_user, delete_user, update_user, infor_user, cart_update
 from app.dtos import LoginSchema, RegisterSchema, UserSchema, CartSchema
-from flask import Blueprint, request
+from flask import Blueprint, request, make_response
 from marshmallow import ValidationError
 import json
 
@@ -9,8 +9,17 @@ user_bp = Blueprint('user', __name__)
 messageRequiredToken = {'message': 'É necessário o token de acesso.'}
 
 
-@user_bp.route('/', methods=['GET', 'PATCH', 'DELETE'])
+@user_bp.route('/', methods=['GET', 'PATCH', 'DELETE', 'OPTIONS'])
 def rud_user():
+    if request.method == 'OPTIONS':
+        response = make_response()
+
+        response.headers["Access-Control-Allow-Methods"] = "GET, PATCH, DELETE"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.status_code = 204
+
+        return response
+
     if not request.authorization:
         return json.dumps(messageRequiredToken), 401
 
@@ -38,8 +47,17 @@ def rud_user():
         return data, status
 
 
-@user_bp.route('/login', methods=['POST'])
+@user_bp.route('/login', methods=['POST', 'OPTIONS'])
 def login():
+    if request.method == 'OPTIONS':
+        response = make_response()
+
+        response.headers["Access-Control-Allow-Methods"] = "POST"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.status_code = 204
+
+        return response
+
     try:
         login_schema = LoginSchema()
 
@@ -56,8 +74,17 @@ def login():
         return err.messages, 400
 
 
-@user_bp.route('/register', methods=['POST'])
+@user_bp.route('/register', methods=['POST', 'OPTIONS'])
 def register():
+    if request.method == 'OPTIONS':
+        response = make_response()
+
+        response.headers["Access-Control-Allow-Methods"] = "POST"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.status_code = 204
+
+        return response
+
     try:
         register_schema = RegisterSchema()
 
@@ -74,8 +101,17 @@ def register():
         return err.messages, 400
 
 
-@user_bp.route('/active', methods=['POST'])
+@user_bp.route('/active', methods=['POST', 'OPTIONS'])
 def active_acount():
+    if request.method == 'OPTIONS':
+        response = make_response()
+
+        response.headers["Access-Control-Allow-Methods"] = "POST"
+        response.headers["Access-Control-Allow-Headers"] = "Authorization"
+        response.status_code = 204
+
+        return response
+
     if not request.authorization:
         return json.dumps(messageRequiredToken), 401
 
@@ -85,8 +121,17 @@ def active_acount():
     return data, status
 
 
-@user_bp.route('/cart', methods=['PATCH'])
+@user_bp.route('/cart', methods=['PATCH', 'OPTIONS'])
 def update_cart():
+    if request.method == 'OPTIONS':
+        response = make_response()
+
+        response.headers["Access-Control-Allow-Methods"] = "PATCH"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.status_code = 204
+
+        return response
+    
     try:
         if not request.authorization:
             return json.dumps(messageRequiredToken), 401

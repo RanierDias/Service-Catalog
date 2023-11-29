@@ -2,7 +2,7 @@ from app.services import getListProduct, getProduct, getProductByCategory, creat
 from app.services import updateProduct, deleteProduct
 from app.dtos import ProductSchema
 from marshmallow import ValidationError
-from flask import Blueprint, request
+from flask import Blueprint, request, make_response
 from bson import ObjectId
 import json
 
@@ -11,8 +11,17 @@ product_bp = Blueprint("product", __name__)
 messageRequiredToken = {'message': 'É necessário o token de acesso.'}
 
 
-@product_bp.route('/', methods=["GET", "POST"])
+@product_bp.route('/', methods=["GET", "POST", "OPTIONS"])
 def cr_products():
+    if request.method == 'OPTIONS':
+        response = make_response()
+
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.status_code = 204
+
+        return response
+
     if request.method == "GET":
         response = getListProduct()
         data, status = response
@@ -35,8 +44,17 @@ def cr_products():
             return err.messages, 400
 
 
-@product_bp.route('/category/<name>', methods=["GET"])
+@product_bp.route('/category/<name>', methods=["GET", "OPTIONS"])
 def read_category(name):
+    if request.method == 'OPTIONS':
+        response = make_response()
+
+        response.headers["Access-Control-Allow-Methods"] = "GET"
+        response.headers["Access-Control-Allow-Headers"] = "none"
+        response.status_code = 204
+
+        return response
+
     response = getProductByCategory(name)
     data, status = response
 
@@ -51,8 +69,17 @@ def transfrom_id():
         request.view_args['id'] = ObjectId(id)
 
 
-@product_bp.route('/<id>', methods=['GET', 'PATCH', 'DELETE'])
+@product_bp.route('/<id>', methods=['GET', 'PATCH', 'DELETE', 'OPTIONS'])
 def rud_product(id):
+    if request.method == 'OPTIONS':
+        response = make_response()
+
+        response.headers["Access-Control-Allow-Methods"] = "GET, PATCH, DELETE"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.status_code = 204
+
+        return response
+
     if request.method == "GET":
         response = getProduct(id)
 
